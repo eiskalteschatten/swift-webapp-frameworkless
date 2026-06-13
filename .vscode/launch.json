@@ -1,0 +1,24 @@
+{
+  "configurations": [
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:swift-webapp-frameworkless}",
+      "name": "Debug ServerApp",
+      "target": "ServerApp",
+      "configuration": "debug",
+      "preLaunchTask": "swift: Build Debug ServerApp"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:swift-webapp-frameworkless}",
+      "name": "Release ServerApp",
+      "target": "ServerApp",
+      "configuration": "release",
+      "preLaunchTask": "swift: Build Release ServerApp"
+    }
+  ]
+}

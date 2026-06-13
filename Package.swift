@@ -1,31 +1,32 @@
-// swift-tools-version: 6.0
+// swift-tools-version:6.0
 import PackageDescription
 
 let package = Package(
-    name: "swift-webapp-frameworkless",
+    name: "ServerApp",
     platforms: [
+        // Ensure availability of modern Swift Regex and strict concurrency features
         .macOS(.v14)
     ],
+    products: [
+        .executable(name: "ServerApp", targets: ["ServerApp"])
+    ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.77.0"),
-        .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.29.0"),
+        // The single Apple-backed dependency for core network streaming
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0")
     ],
     targets: [
         .executableTarget(
-            name: "Application",
+            name: "ServerApp",
             dependencies: [
+                // Pull in SwiftNIO and its specific HTTP parsing module
                 .product(name: "NIO", package: "swift-nio"),
-                .product(name: "NIOCore", package: "swift-nio"),
-                .product(name: "NIOPosix", package: "swift-nio"),
-                .product(name: "NIOHTTP1", package: "swift-nio"),
-                .product(name: "NIOSSL", package: "swift-nio-ssl"),
+                .product(name: "NIOHTTP1", package: "swift-nio")
             ],
-            path: "Sources/Application"
-        ),
-//        .testTarget(
-//            name: "AppTests",
-//            dependencies: ["App"],
-//            path: "Tests/AppTests"
-//        ),
+            path: "Sources",
+            // Instructs the compiler to natively link the OS-provided C SQLite library
+            linkerSettings: [
+                .linkedLibrary("sqlite3")
+            ]
+        )
     ]
 )
