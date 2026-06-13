@@ -43,4 +43,4 @@ router.add(.GET, "/") { head, _, _ in
 
 // Start the SwiftNIO engine
 let server = HTTPServer(host: "127.0.0.1", port: 8080, router: router)
-try server.start()
+try await server.start()

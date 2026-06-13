@@ -15,9 +15,18 @@ private final class HTTPHandler: ChannelInboundHandler, @unchecked Sendable {
 
     private let router: Router
     private var requestHead: HTTPRequestHead?
+    private var context: ChannelHandlerContext?
 
     init(router: Router) {
         self.router = router
+    }
+
+    func handlerAdded(context: ChannelHandlerContext) {
+        self.context = context
+    }
+
+    func handlerRemoved(context: ChannelHandlerContext) {
+        self.context = nil
     }
 
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
@@ -29,19 +38,20 @@ private final class HTTPHandler: ChannelInboundHandler, @unchecked Sendable {
         case .end:
             guard let head = requestHead else { return }
             requestHead = nil
-            let channel = context.channel
             let router = self.router
-            Task { [head = head, router = router, channel = channel] in
+            let eventLoop = context.eventLoop
+            Task { [head = head] in
                 let response = await router.handle(head: head)
-                channel.eventLoop.execute {
-                    Self.write(response: response, to: channel)
+                eventLoop.execute { [weak self] in
+                    guard let self, let context = self.context else { return }
+                    self.write(response: response, context: context)
                 }
             }
         }
     }
 
-    private static func write(response: HTTPResponse, to channel: Channel) {
-        var buffer = channel.allocator.buffer(capacity: response.body.utf8.count)
+    private func write(response: HTTPResponse, context: ChannelHandlerContext) {
+        var buffer = context.channel.allocator.buffer(capacity: response.body.utf8.count)
         buffer.writeString(response.body)
 
         var headers = HTTPHeaders()
@@ -49,10 +59,13 @@ private final class HTTPHandler: ChannelInboundHandler, @unchecked Sendable {
         headers.add(name: "Content-Length", value: "\(buffer.readableBytes)")
         headers.add(name: "Connection", value: "close")
 
-        let head = HTTPResponseHead(version: .http1_1, status: response.status, headers: headers)
-        channel.write(HTTPServerResponsePart.head(head), promise: nil)
-        channel.write(HTTPServerResponsePart.body(.byteBuffer(buffer)), promise: nil)
-        channel.writeAndFlush(HTTPServerResponsePart.end(nil), promise: nil)
+        let responseHead = HTTPResponseHead(version: .http1_1, status: response.status, headers: headers)
+        context.write(wrapOutboundOut(.head(responseHead)), promise: nil)
+        context.write(wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
+        let channel = context.channel
+        context.writeAndFlush(wrapOutboundOut(.end(nil))).whenComplete { _ in
+            channel.close(promise: nil)
+        }
     }
 
     func errorCaught(context: ChannelHandlerContext, error: Error) {
@@ -74,7 +87,7 @@ public final class HTTPServer {
         self.group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
     }
 
-    public func start() throws {
+    public func start() async throws {
         let router = self.router
         let bootstrap = ServerBootstrap(group: group)
             .serverChannelOption(ChannelOptions.backlog, value: 256)
@@ -85,8 +98,8 @@ public final class HTTPServer {
                 }
             }
 
-        let channel = try bootstrap.bind(host: host, port: port).wait()
+        let channel = try await bootstrap.bind(host: host, port: port).get()
         print("Server running on http://\(host):\(port)")
-        try channel.closeFuture.wait()
+        try await channel.closeFuture.get()
     }
 }
