@@ -8,6 +8,11 @@
 let router = Router()
 //let db = try DatabaseContext(path: "app.db")
 
+router.add(.GET, "/") { head, _, _ in
+    let pageHtml = layoutView(title: "Homepage", content: homeView())
+    return HTTPResponse(status: .ok, contentType: "text/html", body: pageHtml.description)
+}
+
 // GET Request with Route Parameters and Query String Parsing
 //router.add(.GET, "/blog/post/:slug") { head, params, urlComponents in
 //    let slug = params["slug"] ?? "unknown"
