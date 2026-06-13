@@ -51,8 +51,8 @@ private final class HTTPHandler: ChannelInboundHandler, @unchecked Sendable {
     }
 
     private func write(response: HTTPResponse, context: ChannelHandlerContext) {
-        var buffer = context.channel.allocator.buffer(capacity: response.body.utf8.count)
-        buffer.writeString(response.body)
+        var buffer = context.channel.allocator.buffer(capacity: response.bodyData.count)
+        buffer.writeBytes(response.bodyData)
 
         var headers = HTTPHeaders()
         headers.add(name: "Content-Type", value: response.contentType)

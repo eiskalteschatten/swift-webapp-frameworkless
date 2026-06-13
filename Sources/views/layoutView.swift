@@ -10,6 +10,7 @@ func layoutView(title: String, content: HTML) -> HTML {
     <!DOCTYPE html>
     <html>
     <head><title>\(title)</title></head>
+    <link rel="stylesheet" href="/css/main.css">
     <body>
         <nav><a href="/">Dashboard</a></nav>
         <main>\(content)</main>

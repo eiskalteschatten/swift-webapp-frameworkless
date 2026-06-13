@@ -5,6 +5,8 @@
 //  Created by Alex Seifert on 13/06/2026.
 //
 
+import Foundation
+
 let router = Router()
 //let db = try DatabaseContext(path: "app.db")
 
@@ -40,6 +42,13 @@ router.add(.GET, "/") { head, _, _ in
 //
 //    return HTTPResponse(status: .notFound, body: "User record missing")
 //}
+
+// Derive the project root from this source file's compile-time path,
+// since the working directory when run from Xcode is not the project root.
+let projectRoot = URL(fileURLWithPath: #filePath)
+    .deletingLastPathComponent() // Sources/
+    .deletingLastPathComponent() // project root
+router.serveStaticFiles(from: projectRoot.appendingPathComponent("Public").path)
 
 // Start the SwiftNIO engine
 let server = HTTPServer(host: "127.0.0.1", port: 8080, router: router)
