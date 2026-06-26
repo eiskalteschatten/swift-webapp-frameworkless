@@ -22,11 +22,7 @@ let package = Package(
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "NIOHTTP1", package: "swift-nio")
             ],
-            path: "Sources",
-            // Instructs the compiler to natively link the OS-provided C SQLite library
-            linkerSettings: [
-                .linkedLibrary("sqlite3")
-            ]
+            path: "Sources"
         )
     ]
 )
