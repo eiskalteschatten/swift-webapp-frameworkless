@@ -23,24 +23,10 @@ router.add(.GET, "/hello/:name") { head, params, urlComponents in
     let isGerman = germanParam == "true"
     
     let title = isGerman ? "Hallo \(name)!" : "Hello \(name)!"
-    let pageHtml = layoutView(title: title, content: helloView(name: name, isGerman: isGerman))
+    let pageHtml = layoutView(title: title, content: helloView(name: name, isGerman: isGerman), name: name)
 
     return HTTPResponse(status: .ok, contentType: "text/html", body: pageHtml.description)
 }
-
-// POST Request dealing with persistent Actor state
-//router.add(.POST, "/user/:id") { head, params, _ in
-//    guard let idString = params["id"], let id = Int(idString) else {
-//        return HTTPResponse(status: .badRequest, body: "Invalid ID")
-//    }
-//
-//    // Asynchronously switch execution contexts context safely to the Database Actor
-//    if let user = await db.queryUser(id: id) {
-//        return HTTPResponse(status: .ok, body: "Fetched user: \(user["username"] ?? "")")
-//    }
-//
-//    return HTTPResponse(status: .notFound, body: "User record missing")
-//}
 
 // Derive the project root from this source file's compile-time path,
 // since the working directory when run from Xcode is not the project root.

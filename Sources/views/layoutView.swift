@@ -5,7 +5,7 @@
 //  Created by Alex Seifert on 13/06/2026.
 //
 
-func layoutView(title: String, content: HTML) -> HTML {
+func layoutView(title: String, content: HTML, name: String = "") -> HTML {
     return """
     <!DOCTYPE html>
     <html>
@@ -15,9 +15,11 @@ func layoutView(title: String, content: HTML) -> HTML {
     <body>
         <nav><a href="/">Home</a></nav>
         <main>\(content)</main>
-        <p>Input your name: <input type="text" id="name"></p>
-        <p><button type="button" id="sayHelloButton">Say Hello!</button></p>
-        <p><button type="button" id="sayHelloGermanButton">Say Hello in German!</button></p>
+        <p>Input your name: <input type="text" id="name" value="\(name)"></p>
+        <div class="buttons">
+            <button type="button" id="sayHelloButton">Say Hello!</button>
+            <button type="button" id="sayHelloGermanButton">Say Hello in German!</button>
+        </div>
     </body>
     </html>
     """
