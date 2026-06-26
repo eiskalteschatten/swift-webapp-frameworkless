@@ -6,6 +6,6 @@
 //
 
 func helloView(name: String, isGerman: Bool = false) -> HTML {
-    let greeting = isGerman ? "Hallo \(name)" : "Hello \(name)"
+    let greeting = isGerman ? "Hallo \(name)!" : "Hello \(name)!"
     return "<p>\(greeting)</p>"
 }

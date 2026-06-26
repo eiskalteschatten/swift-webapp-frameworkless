@@ -9,4 +9,3 @@ document.addEventListener("DOMContentLoaded", function () {
         window.location = `/hello/${name}?german=true`;
     });
 });
-

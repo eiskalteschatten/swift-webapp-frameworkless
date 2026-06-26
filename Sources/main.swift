@@ -21,8 +21,9 @@ router.add(.GET, "/hello/:name") { head, params, urlComponents in
     // Extract query param: ?preview=true
     let germanParam = urlComponents.queryItems?.first(where: { $0.name == "german" })?.value
     let isGerman = germanParam == "true"
-
-    let pageHtml = layoutView(title: "Viewing Post", content: helloView(name: name, isGerman: isGerman))
+    
+    let title = isGerman ? "Hallo \(name)!" : "Hello \(name)!"
+    let pageHtml = layoutView(title: title, content: helloView(name: name, isGerman: isGerman))
 
     return HTTPResponse(status: .ok, contentType: "text/html", body: pageHtml.description)
 }
