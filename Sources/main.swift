@@ -8,7 +8,6 @@
 import Foundation
 
 let router = Router()
-//let db = try DatabaseContext(path: "app.db")
 
 router.add(.GET, "/") { head, _, _ in
     let pageHtml = layoutView(title: "Homepage", content: homeView())
@@ -16,18 +15,17 @@ router.add(.GET, "/") { head, _, _ in
 }
 
 // GET Request with Route Parameters and Query String Parsing
-//router.add(.GET, "/blog/post/:slug") { head, params, urlComponents in
-//    let slug = params["slug"] ?? "unknown"
-//
-//    // Extract query param: ?preview=true
-//    let previewParam = urlComponents.queryItems?.first(where: { $0.name == "preview" })?.value
-//    let isPreview = previewParam == "true"
-//
-//    let users = ["Alice", "Bob", "<script>alert('xss')</script>"] // Escapes safely!
-//    let pageHtml = layoutView(title: "Viewing Post", content: userListView(users: users))
-//
-//    return HTTPResponse(status: .ok, contentType: "text/html", body: pageHtml.description)
-//}
+router.add(.GET, "/hello/:name") { head, params, urlComponents in
+    let name = params["name"] ?? "unknown"
+
+    // Extract query param: ?preview=true
+    let germanParam = urlComponents.queryItems?.first(where: { $0.name == "german" })?.value
+    let isGerman = germanParam == "true"
+
+    let pageHtml = layoutView(title: "Viewing Post", content: helloView(name: name, isGerman: isGerman))
+
+    return HTTPResponse(status: .ok, contentType: "text/html", body: pageHtml.description)
+}
 
 // POST Request dealing with persistent Actor state
 //router.add(.POST, "/user/:id") { head, params, _ in
