@@ -128,8 +128,7 @@ Sources/
 └── views/
     ├── layoutView.swift    # Shared page layout (shell HTML, stylesheet, scripts)
     ├── homeView.swift      # Home page view
-    ├── helloView.swift     # Greeting view (supports English and German)
-    └── userListView.swift  # Renders a list of users
+    └── helloView.swift     # Greeting view (supports English and German)
 Public/
 ├── css/
 │   └── main.css        # Stylesheet, served as a static file
@@ -208,7 +207,6 @@ Views are plain Swift functions that return `HTML`. They use Swift string interp
 | `layoutView` | `(title: String, content: HTML, name: String) -> HTML` | Outer page shell — includes the `<html>`, `<head>`, stylesheet link, script tag, and shared UI controls |
 | `homeView` | `() -> HTML` | Simple home page heading |
 | `helloView` | `(name: String, isGerman: Bool) -> HTML` | Greeting heading; renders in German when `isGerman` is `true` |
-| `userListView` | `(users: [String]) -> HTML` | Unordered list of user names using the `each:render:` interpolation helper |
 
 ### 5. Routes (`main.swift`)
 
@@ -216,7 +214,6 @@ Views are plain Swift functions that return `HTML`. They use Swift string interp
 |---|---|---|
 | `GET` | `/` | Renders the home page |
 | `GET` | `/hello/:name` | Renders a greeting for `name`; pass `?german=true` to switch language |
-| `POST` | `/hello` | Skeleton POST handler — receives a JSON or form body via the `body: Data` parameter |
 | `GET` | `/*` | Static file handler — serves anything under `Public/` |
 
 ### 6. Client-Side JavaScript (`Public/js/scripts.js`)
