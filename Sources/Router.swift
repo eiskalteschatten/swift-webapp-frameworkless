@@ -26,7 +26,7 @@ public struct HTTPResponse: Sendable {
     }
 }
 
-public typealias Handler = (HTTPRequestHead, [String: String], URLComponents) async -> HTTPResponse
+public typealias Handler = (HTTPRequestHead, [String: String], URLComponents, Data) async -> HTTPResponse
 
 public struct Route {
     let method: HTTPMethod
@@ -61,7 +61,7 @@ public final class Router: @unchecked Sendable {
             method: .GET,
             regex: regex,
             paramNames: ["filePath"],
-            handler: { _, params, _ in
+            handler: { _, params, _, _ in
                 guard let filePath = params["filePath"] else {
                     return HTTPResponse(status: .notFound, body: "Not Found")
                 }
@@ -88,7 +88,7 @@ public final class Router: @unchecked Sendable {
         lock.withLock { routes.append(route) }
     }
 
-    public func handle(head: HTTPRequestHead) async -> HTTPResponse {
+    public func handle(head: HTTPRequestHead, body: Data = Data()) async -> HTTPResponse {
         guard let components = URLComponents(string: head.uri) else {
             return HTTPResponse(status: .badRequest, body: "Invalid URL")
         }
@@ -108,7 +108,7 @@ public final class Router: @unchecked Sendable {
                         params[name] = String(value)
                     }
                 }
-                return await route.handler(head, params, components)
+                return await route.handler(head, params, components, body)
             }
         }
         return HTTPResponse(status: .notFound, body: "Not Found")

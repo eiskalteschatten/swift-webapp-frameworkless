@@ -15,6 +15,7 @@ private final class HTTPHandler: ChannelInboundHandler, @unchecked Sendable {
 
     private let router: Router
     private var requestHead: HTTPRequestHead?
+    private var bodyBuffer: ByteBuffer?
     private var context: ChannelHandlerContext?
 
     init(router: Router) {
@@ -33,15 +34,27 @@ private final class HTTPHandler: ChannelInboundHandler, @unchecked Sendable {
         switch unwrapInboundIn(data) {
         case .head(let head):
             requestHead = head
-        case .body:
-            break
+            bodyBuffer = nil
+        case .body(var buffer):
+            if bodyBuffer == nil {
+                bodyBuffer = buffer
+            } else {
+                bodyBuffer!.writeBuffer(&buffer)
+            }
         case .end:
             guard let head = requestHead else { return }
+            let body: Data
+            if var buf = bodyBuffer, let bytes = buf.readBytes(length: buf.readableBytes) {
+                body = Data(bytes)
+            } else {
+                body = Data()
+            }
             requestHead = nil
+            bodyBuffer = nil
             let router = self.router
             let eventLoop = context.eventLoop
             Task { [head = head] in
-                let response = await router.handle(head: head)
+                let response = await router.handle(head: head, body: body)
                 eventLoop.execute { [weak self] in
                     guard let self, let context = self.context else { return }
                     self.write(response: response, context: context)
@@ -83,7 +96,6 @@ public final class HTTPServer {
         self.host = host
         self.port = port
         self.router = router
-        // Spin up an event loop pool matching CPU core count
         self.group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
     }
 

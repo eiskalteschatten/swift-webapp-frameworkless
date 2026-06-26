@@ -45,7 +45,7 @@ The server will start at `http://127.0.0.1:8080`.
 2. Select the **ServerApp** scheme from the scheme picker in the toolbar.
 3. Press **⌘R** to build and run.
 
-> **Note:** Xcode sets the working directory to the build products folder, not the project root. This project handles that automatically using `#filePath` at compile time to resolve the path to `Public/`, so static files will be served correctly without any extra configuration.
+> **Note:** Xcode sets the working directory to the build products folder, not the project root. This is fine — the project resolves the path to `Public/` at runtime by walking up from the binary's location, so static files will be served correctly without any extra Xcode configuration.
 
 The server will start at `http://127.0.0.1:8080`. Output (including the startup message) will appear in the Xcode console.
 
@@ -235,4 +235,4 @@ Both listeners are registered inside a `DOMContentLoaded` handler to ensure the 
 - **No web framework** — only [SwiftNIO](https://github.com/apple/swift-nio) (`NIO` + `NIOHTTP1`) is used as a dependency, giving full visibility into every layer of the stack.
 - **Swift 6 strict concurrency** — the project targets Swift 6.0. `Router` uses `NSLock` for thread-safe route registration and a copy-on-read snapshot pattern to avoid holding the lock during route matching.
 - **Compile-time XSS safety** — the `HTML` type makes it impossible to accidentally interpolate an unescaped `String` into a template; safety is enforced by the type system rather than by convention.
-- **Project-relative static files** — `#filePath` is used at compile time to derive the absolute path to `Public/`, so static file serving works correctly regardless of the working directory Xcode or `swift run` sets at launch.
+- **Runtime-relative static files** — the path to `Public/` is resolved at runtime by walking up from the running binary's location (`CommandLine.arguments[0]`), rather than using `#filePath` at compile time. This means the binary can be built on one machine and deployed to another without breaking static file serving.
