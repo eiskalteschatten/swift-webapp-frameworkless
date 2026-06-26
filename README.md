@@ -4,6 +4,25 @@ A frameworkless Swift web server built on top of [SwiftNIO](https://github.com/a
 
 ---
 
+## Table of Contents
+
+- [Requirements](#requirements)
+- [Running the Server](#running-the-server)
+  - [Terminal](#terminal)
+  - [Xcode](#xcode)
+  - [Linux Server](#linux-server)
+- [Project Structure](#project-structure)
+- [How It Works](#how-it-works)
+  - [1. HTTP Server](#1-http-server-httpserverswift)
+  - [2. Router](#2-router-routerswift)
+  - [3. HTML Type & XSS Safety](#3-html-type--xss-safety-htmlswift)
+  - [4. Views](#4-views-sourcesviews)
+  - [5. Routes](#5-routes-mainswift)
+  - [6. Client-Side JavaScript](#6-client-side-javascript-publicjsscriptsjs)
+- [Key Design Decisions](#key-design-decisions)
+
+---
+
 ## Requirements
 
 - Swift 6.0+
@@ -12,11 +31,89 @@ A frameworkless Swift web server built on top of [SwiftNIO](https://github.com/a
 
 ## Running the Server
 
+### Terminal
+
 ```bash
 swift run
 ```
 
 The server will start at `http://127.0.0.1:8080`.
+
+### Xcode
+
+1. Open the project in Xcode: `File > Open` and select the `swift-webapp-frameworkless` folder (Xcode will detect the `Package.swift` automatically).
+2. Select the **ServerApp** scheme from the scheme picker in the toolbar.
+3. Press **⌘R** to build and run.
+
+> **Note:** Xcode sets the working directory to the build products folder, not the project root. This project handles that automatically using `#filePath` at compile time to resolve the path to `Public/`, so static files will be served correctly without any extra configuration.
+
+The server will start at `http://127.0.0.1:8080`. Output (including the startup message) will appear in the Xcode console.
+
+### Linux Server
+
+1. **Install Swift** on your server. The recommended way is via [swiftly](https://swift.org/install), the official Swift toolchain installer:
+   ```bash
+   curl -L https://swift.org/install.sh | bash
+   swiftly install latest
+   ```
+   Alternatively, download a toolchain directly from [swift.org/download](https://www.swift.org/download/).
+
+2. **Copy the project** to your server (e.g. via `scp`, `rsync`, or by cloning the repository).
+
+3. **Build a release binary:**
+   ```bash
+   swift build -c release
+   ```
+
+4. **Run the server:**
+   ```bash
+   .build/release/ServerApp
+   ```
+
+5. **(Optional) Run as a background service** using `systemd`. Create `/etc/systemd/system/serverapp.service`:
+   ```ini
+   [Unit]
+   Description=Swift ServerApp
+   After=network.target
+
+   [Service]
+   WorkingDirectory=/path/to/swift-webapp-frameworkless
+   ExecStart=/path/to/swift-webapp-frameworkless/.build/release/ServerApp
+   Restart=always
+   RestartSec=5
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+   Then enable and start it:
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable serverapp
+   sudo systemctl start serverapp
+   ```
+
+6. **(Optional) Expose via a reverse proxy.** The server listens on `127.0.0.1:8080` by default. Use nginx or Caddy to forward public traffic:
+
+   **nginx:**
+   ```nginx
+   server {
+       listen 80;
+       server_name example.com;
+
+       location / {
+           proxy_pass http://127.0.0.1:8080;
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+       }
+   }
+   ```
+
+   **Caddy (`Caddyfile`):**
+   ```
+   example.com {
+       reverse_proxy 127.0.0.1:8080
+   }
+   ```
 
 ---
 
