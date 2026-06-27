@@ -26,6 +26,7 @@ A frameworkless Swift web server built on top of [SwiftNIO](https://github.com/a
 ## Requirements
 
 - Swift 6.0+
+- macOS 14+ or Linux (only supported on Windows via WSL)
 
 ---
 
@@ -68,51 +69,6 @@ The server will start at `http://127.0.0.1:8080`. Output (including the startup 
 4. **Run the server:**
    ```bash
    .build/release/ServerApp
-   ```
-
-5. **(Optional) Run as a background service** using `systemd`. Create `/etc/systemd/system/serverapp.service`:
-   ```ini
-   [Unit]
-   Description=Swift ServerApp
-   After=network.target
-
-   [Service]
-   WorkingDirectory=/path/to/swift-webapp-frameworkless
-   ExecStart=/path/to/swift-webapp-frameworkless/.build/release/ServerApp
-   Restart=always
-   RestartSec=5
-
-   [Install]
-   WantedBy=multi-user.target
-   ```
-   Then enable and start it:
-   ```bash
-   sudo systemctl daemon-reload
-   sudo systemctl enable serverapp
-   sudo systemctl start serverapp
-   ```
-
-6. **(Optional) Expose via a reverse proxy.** The server listens on `127.0.0.1:8080` by default. Use nginx or Caddy to forward public traffic:
-
-   **nginx:**
-   ```nginx
-   server {
-       listen 80;
-       server_name example.com;
-
-       location / {
-           proxy_pass http://127.0.0.1:8080;
-           proxy_set_header Host $host;
-           proxy_set_header X-Real-IP $remote_addr;
-       }
-   }
-   ```
-
-   **Caddy (`Caddyfile`):**
-   ```
-   example.com {
-       reverse_proxy 127.0.0.1:8080
-   }
    ```
 
 ---
