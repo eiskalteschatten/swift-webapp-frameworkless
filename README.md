@@ -2,6 +2,8 @@
 
 A frameworkless Swift web server built on top of [SwiftNIO](https://github.com/apple/swift-nio). It demonstrates how to build a fully functional HTTP server — with routing, dynamic HTML templating, static file serving, and XSS-safe string interpolation — without reaching for a high-level web framework like Vapor.
 
+See this blog post for more details as to why and how it was created: https://blog.alexseifert.com/2026/06/29/building-a-web-app-in-swift-using-only-swiftnio/
+
 ---
 
 ## Table of Contents
